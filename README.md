@@ -14,6 +14,7 @@ pip install -r requirements.txt
 
 ### 2. Set slackbot token in sample_slack_key.json
 Rename it if you want to
+
 You can ignore test parameter, but you have to set `test=False` in main file
 1. WEB_HOOK_URL
 2. Slack Channel ID you want to send message
