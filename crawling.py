@@ -16,25 +16,23 @@ class NoticeRow:
     link_to_notice: str
 
 
-def write_page_id_to_file(href: str):
-    if os.path.exists("./page_id.txt") is False:
-        with open("./page_id.txt", "w") as f:
+def write_page_id_to_file(href: str, db_file_name="page_id.txt"):
+    if os.path.exists(db_file_name) is False:
+        with open(db_file_name, "w") as f:
             f.write(f"\n{href}")
         return
 
-    with open("page_id.txt", "a") as f:
+    with open(db_file_name, "a") as f:
         f.write(f"\n{href}")
 
 
-def read_page_id_from_file(href: str):
-    if os.path.exists("./page_id.txt") is False:
-        return False
+def load_page_id_from_file(href: str, db_file_name="page_id.txt"):
+    if os.path.exists(db_file_name) is False:
+        return set()
 
     with open("./page_id.txt", "r") as f:
-        page_id_list = f.read().strip().split()
-        if href in page_id_list:
-            return True
-        return False
+        page_id_list = set(f.read().strip().split())
+        return page_id_list
 
 
 def get_table_rows(row):
@@ -71,11 +69,10 @@ def make_slack_format(gradudate: bool, notice: NoticeRow) -> dict:
     return slack_text
 
 
-def send_slack_message(slack, notice, gradudate):
-    previously_sent = read_page_id_from_file(notice.link_to_notice)
-    if not previously_sent:
+def send_slack_message(slack, notice, gradudate, page_ids, db_file_path):
+    if notice.link_to_notice not in page_ids:
         slack.alarm_msg(make_slack_format(gradudate=gradudate, notice=notice))
-        write_page_id_to_file(notice.link_to_notice)
+        write_page_id_to_file(notice.link_to_notice, db_file_name=db_file_path)
 
 
 if __name__ == "__main__":
@@ -93,12 +90,16 @@ if __name__ == "__main__":
     graduate_url = "https://sme.pknu.ac.kr/sme/1849"
     graduate_notice = main(driver, graduate_url)
 
+    page_ids = load_page_id_from_file(graduate_url, db_file_name=os.path.join(args.workspace, "page_id.txt"))
+
     for notice in graduate_notice:
-        send_slack_message(slack, notice, gradudate=True)
+        send_slack_message(slack, notice, gradudate=True, page_ids=page_ids,
+                           db_file_path=os.path.join(args.workspace, "page_id.txt"))
 
     # 학부
     undergraduate_url = "https://sme.pknu.ac.kr/sme/721"
     undergraduate_notice = main(driver, undergraduate_url)
 
     for notice in undergraduate_notice:
-        send_slack_message(slack, notice, gradudate=False)
+        send_slack_message(slack, notice, gradudate=False, page_ids=page_ids,
+                           db_file_path=os.path.join(args.workspace, "page_id.txt")
