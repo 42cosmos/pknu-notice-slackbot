@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from dataclasses import dataclass
 
 from slack_messanger import SlackMessenger
+import argparse
 
 
 @dataclass
@@ -78,11 +79,15 @@ def send_slack_message(slack, notice, gradudate):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--workspace", type=str, default="")
+    args = parser.parse_args()
+
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
 
-    driver = webdriver.Chrome("chromedriver_path", options=options)
-    slack = SlackMessenger(test=False, key_path="sample_slack_key.json")
+    driver = webdriver.Chrome(os.path.join(args.workspace, "chromedriver"), options=options)
+    slack = SlackMessenger(test=True, key_path=os.path.join(args.workspace, "slack_key.json"))
 
     # 대학원
     graduate_url = "https://sme.pknu.ac.kr/sme/1849"
