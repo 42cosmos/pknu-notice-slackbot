@@ -2,7 +2,7 @@
   "SLACK": {
     "WEB_HOOK_URL": "https://hooks.slack.com/services/your_bot_web_hook_url",
     "CHANNEL": "your_channel",
-    "ACCESSED_TOKEN": "xoxb-your_bot_accessed_token
+    "ACCESSED_TOKEN": "xoxb-your_bot_accessed_token"
   },
   "TEST_SLACK": {
     "WEB_HOOK_URL": "https://hooks.slack.com/services/your_bot_web_hook_url",
