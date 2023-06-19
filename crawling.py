@@ -41,6 +41,17 @@ def get_table_rows(row):
     return NoticeRow(text.text, update_date.text, link_to_notice)
 
 
+def remove_duplicate_notices(notices):
+    seen = set()
+    result = []
+    for notice in notices:
+        notice_tuple = (notice.text, notice.update_date, notice.link_to_notice)
+        if notice_tuple not in seen:
+            seen.add(notice_tuple)
+            result.append(notice)
+    return result
+
+
 def set_driver(driver, url):
     # driver.implicitly_wait(3)  # 묵시적 대기
     driver.get(url=url)
@@ -53,6 +64,7 @@ def set_driver(driver, url):
     for row in rows:
         slack_message_list.append(get_table_rows(row))
 
+    slack_message_list = remove_duplicate_notices(slack_message_list)
     return slack_message_list
 
 
@@ -68,9 +80,11 @@ def make_slack_format(graduate: bool, notice: NoticeRow) -> dict:
 
 def send_slack_message(slack, notice, check_graduate, page_ids):
     if notice.link_to_notice not in page_ids:
-        slack.alarm_msg(make_slack_format(graduate=check_graduate, notice=notice))
-        return True
-    return False
+        try:
+            slack.alarm_msg(make_slack_format(graduate=check_graduate, notice=notice))
+            return True
+        except Exception as e:
+            return False
 
 
 def process_notices(driver, slack, url, graduate, page_ids):
